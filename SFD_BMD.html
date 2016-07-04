@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head><title>Canvas code example</title>
+<script type="text/javascript">
+		//calculations
+
+			var x1;
+			var x2;
+			var L;
+			var F1;
+			var F2;
+			var M;
+
+			var w;
+			var By;
+			var Ay;
+			var V0;
+			var M0;
+
+		var c_1; //initial condition F(0) = c_1 for integral
+		var c_2; //initial condition F(0) = c_2 for double integral
+
+		var scaleX = 20; //x axis pixles per unit
+		var scaleY = 0.1; //y axis pixles per unit 
+
+		var dx = 1 //delta x = 1 pixle. Will break sometimes at step inputs. 
+
+		var barwidth = 10;
+		var scale = 50 //for drawing arrows and bars
+		var mu = 150 //newtowns per pixle
+		
+		function fun1(x) {
+				if (x >= x1    &&    x < x1 + dx/scaleX    &&   x >= x2    &&    x < x2 + dx/scaleX) {
+					return (-w - F1/(dx/scaleX) - F2/(dx/scaleX));
+				} else if (x >= x1    &&    x < x1 + dx/scaleX) {
+				    return (-w - F1/(dx/scaleX));
+				} else if (x >= x2    &&    x < x2 + dx/scaleX) {
+				    return (-w - F2/(dx/scaleX));
+				} else {
+				    return (-w);
+				}
+		}
+		function fun2(x) {return (
+				-0.5*x*x + 2*x + 1
+			);}
+
+		function draw() {
+		// var canvas = document.getElementById("canvas");
+		// var axes={}, ctx=canvas.getContext("2d");
+		var ctx = getCanvas();
+		var axes={}
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+			x1 = Number(document.getElementById("x1").value);
+			x2 = Number(document.getElementById("x2").value);
+			L = Number(document.getElementById("L").value);
+			F1 = Number(document.getElementById("F1").value);
+			F2 = Number(document.getElementById("F2").value);
+			M = Number(document.getElementById("M").value);
+
+			w = M * 9.81 / L;
+			By = F1*x1/L + F2*x2/L + M*9.81/2;
+			Ay = F1 + F2 + M*9.81 - By;
+			V0 = Ay;
+			M0 = 0;
+
+			c_1 = V0;
+			c_2 = M0;
+
+		ctx.canvas.width = L * scaleX;
+
+
+		//bar
+		drawRectangleSlant(5/scale,0.25*canvas.height/scale - 0.5 * barwidth/scale,canvas.width/scale-10/scale,barwidth/scale,0);
+
+		//drawing w box
+		drawRectangleSlantYellow(5/scale,0.25*canvas.height/scale - 0.5 * barwidth/scale - w/50,canvas.width/scale-10/scale,w/50,0)
+
+		//drawing w arrows
+		for (i = 0; i <= L; i++) {
+		drawArrowSmall(((canvas.width-10)/canvas.width)*(scaleX/scale)*i + 5/scale,0.25*canvas.height/scale - 0.5 * barwidth/scale -w/50,((canvas.width-10)/canvas.width)*(scaleX/scale)*i + 5/scale,0.25*canvas.height/scale - 0.5 * barwidth/scale, "orange");
+		}
+
+		//Ay
+		drawArrowSmall(5/scale,0.25*canvas.height/scale + 0.5 * barwidth/scale+Ay/mu,5/scale,0.25*canvas.height/scale + 0.5 * barwidth/scale, "blue")
+		//By
+		drawArrowSmall(canvas.width/scale-5/scale,0.25*canvas.height/scale + 0.5 * barwidth/scale+By/mu,canvas.width/scale-5/scale,0.25*canvas.height/scale + 0.5 * barwidth/scale, "blue")
+
+		if (x1==x2) {
+			drawArrowSmall(x1*((canvas.width-10)/canvas.width)*scaleX/scale + 5/scale,0.25*canvas.height/scale - 0.5 * barwidth/scale - (F1+F2)/mu,x1*((canvas.width-10)/canvas.width)*scaleX/scale + 5/scale, 0.25*canvas.height/scale - 0.5 * barwidth/scale,"green");
+		}
+		else{
+		//F1
+		drawArrowSmall(x1*((canvas.width-10)/canvas.width)*scaleX/scale + 5/scale,0.25*canvas.height/scale - 0.5 * barwidth/scale - F1/mu,x1*((canvas.width-10)/canvas.width)*scaleX/scale + 5/scale, 0.25*canvas.height/scale - 0.5 * barwidth/scale,"green");
+		//F2
+		drawArrowSmall(x2*((canvas.width-10)/canvas.width)*scaleX/scale + 5/scale,0.25*canvas.height/scale - 0.5 * barwidth/scale - F2/mu,x2*((canvas.width-10)/canvas.width)*scaleX/scale + 5/scale, 0.25*canvas.height/scale - 0.5 * barwidth/scale,"green");
+}
+
+
+
+		
+
+		 //x_0 is where I want to place by y axis relative to the left of the canvas
+		 //y_0 is where I want to place my x axis relative to the top of the canvas
+		 axes.x0 = 0;  // x0 pixels from left to x=0
+		 axes.y0 = .9*canvas.height; // y0 pixels from top to y=0
+
+		 // PLOT graphs!
+		 showAxes(ctx,axes);
+		 //Plot(ctx,axes,fun1,"black",1); 
+		 Plot_Integral(ctx,axes,fun1,"orange",2);
+		 Plot_Double_Integral(ctx,axes,fun1,"blue",1);
+		}
+
+		function Plot (ctx,axes,func,color,thick) {
+		 var x0=axes.x0, y0=axes.y0 ;
+		 var xx = -x0, yy; //initial values at the very left of the graph
+		 ctx.beginPath();
+		 ctx.lineWidth = thick;
+		 ctx.strokeStyle = color;
+
+		 for (var i=0;i<=ctx.canvas.width;i++) {
+		  xx = xx + dx; yy = scaleY*func(xx/scaleX); 
+		  if (i==0) ctx.moveTo(x0+xx,y0- yy); 
+		  else         ctx.lineTo(x0+xx,y0- yy);
+		 }
+		 ctx.stroke();
+		}
+
+		function Plot_Integral (ctx,axes,func,color,thick) {
+		 var x0=axes.x0, y0=axes.y0 ;
+		 var xx = 0, yy = c_1 * scaleY;
+		 ctx.beginPath();
+		 ctx.lineWidth = thick;
+		 ctx.strokeStyle = color;
+
+		 for (var i=0;i<=ctx.canvas.width - x0;i++) {
+		  xx = xx + dx; yy = yy + 0.5 * dx/scaleX * (func(xx/scaleX) + func(xx/scaleX-dx/scaleX)) * scaleY; 
+		  if (i==0) ctx.moveTo(x0+xx,y0- yy); 
+		  else         ctx.lineTo(x0+xx,y0- yy);
+		 }
+
+		 xx = 0; yy = c_1 * scaleY;
+		 ctx.moveTo(xx,yy);
+		 for (var i=0;i<=x0;i++) {
+		  yy = yy - 0.5 * dx/scaleX * (func(xx/scaleX) + func(xx/scaleX-dx/scaleX)) * scaleY; xx = xx - dx;
+		  if (i==0) ctx.moveTo(x0+xx,y0- yy); 
+		  else         ctx.lineTo(x0+xx,y0- yy);
+		 }
+		 ctx.stroke();
+		}
+
+		function Plot_Double_Integral (ctx,axes,func,color,thick) {
+		 var x0=axes.x0, y0=axes.y0 ;
+		 var xx = 0, yy = c_2 * scaleY; Y = c_1 * scaleY;
+		 ctx.beginPath();
+		 ctx.lineWidth = thick;
+		 ctx.strokeStyle = color;
+
+		 for (var i=0;i<=ctx.canvas.width - x0;i++) {
+		  xx = xx + dx; yy = yy + dx/scaleX * Y + 0.5 * dx / scaleX * 0.5 * dx / scaleX * (func(xx / scaleX) + func(xx/scaleX-dx/scaleX)) * scaleY; Y = Y + 0.5 * dx/scaleX * (func(xx/scaleX) + func(xx/scaleX-dx/scaleX))*scaleY;
+		  if (i==0) ctx.moveTo(x0+xx,y0- yy); 
+		  else         ctx.lineTo(x0+xx,y0- yy);
+		 }
+
+		 xx = 0; yy = c_2 * scaleY; Y = c_1 * scaleY;
+		 ctx.moveTo(xx,yy);
+		 for (var i=0;i<=x0;i++) {
+		  yy = yy - dx/scaleX* Y - 0.5 * dx/scaleX * 0.5 * dx/scaleX * (func(xx/scaleX) + func(xx/scaleX-dx/scaleX))*scaleY; Y = Y - 0.5 * dx/scaleX * (func(xx/scaleX) + func(xx/scaleX-dx/scaleX))*scaleY; xx = xx - dx;
+		  if (i==0) ctx.moveTo(x0+xx,y0- yy); 
+		  else         ctx.lineTo(x0+xx,y0- yy);
+		 }
+		 ctx.stroke();
+		}
+
+
+		function showAxes(ctx,axes) {
+		 var x0=axes.x0, w=ctx.canvas.width;
+		 var y0=axes.y0, h=ctx.canvas.height;
+		 var xmin =  0;
+		 ctx.beginPath();
+		 ctx.strokeStyle = "rgb(128,128,128)"; 
+		 ctx.moveTo(xmin,y0); ctx.lineTo(w,y0);  // X axis
+		 ctx.moveTo(x0,h/2);    ctx.lineTo(x0,h);  // Y axis
+		 ctx.stroke();
+		}
+
+
+function x1change(val) {
+	document.getElementById('slider_x1').innerHTML = val;
+}
+
+function x2change(val) {
+	document.getElementById('slider_x2').innerHTML = val;
+}
+
+function Lchange(val) {
+	document.getElementById('slider_L').innerHTML = val;
+	//document.getElementById('x1').max = val - 0.5;
+	//document.getElementById('x2').max = val - 0.5;
+}
+
+function F1change(val) {
+	document.getElementById('slider_F1').innerHTML = val;
+}
+
+function F2change(val) {
+	document.getElementById('slider_F2').innerHTML = val;
+}
+
+function Mchange(val) {
+	document.getElementById('slider_M').innerHTML = val;
+}
+
+function getCanvas() {
+	var c = document.getElementById("canvas");
+	return c.getContext("2d");
+} 
+
+
+function drawArrowSmall(x,y,x_tip,y_tip,color) {
+	var ctx=canvas.getContext("2d");
+
+	var gr = ctx.createLinearGradient(x,y,x_tip,y_tip);
+	gr.addColorStop(0,color);
+	gr.addColorStop(1,color);
+	ctx.strokeStyle = gr
+
+	var theta = Math.atan((y_tip - y) / (x_tip - x));
+		if (x_tip - x < 0) {
+	    theta = theta + Math.PI;
+	} else { 
+	    theta = theta;
+	}
+	ctx.beginPath();
+	ctx.moveTo(x * scale, y * scale);
+	ctx.lineTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.15 * Math.sin(Math.PI/3 - theta), scale*y_tip - scale*0.15 * Math.cos(Math.PI/3 - theta));
+	ctx.moveTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.15 * Math.cos(Math.PI/6 - theta), scale*y_tip + scale*0.15 * Math.sin(Math.PI/6 - theta));
+	ctx.stroke();
+
+	ctx.closePath();
+}
+
+function drawLine(x1,y1,x2,y2) {
+	var ctx = canvas.getContext("2d");;
+	ctx.beginPath();
+
+		var gr = ctx.createLinearGradient(x,y,x_tip,y_tip);
+	gr.addColorStop(0,color);
+	gr.addColorStop(1,color);
+	ctx.strokeStyle = gr
+
+	ctx.moveTo(x1 * scale,y1 * scale);
+	ctx.lineTo(x2 * scale,y2 * scale);
+	ctx.stroke();
+}
+
+function drawRectangleSlant(x1, y1, L, t, theta) {
+	var ctx=canvas.getContext("2d");
+	ctx.beginPath();
+	var gr = ctx.createLinearGradient(scale * x1, scale * y1, scale * (x1 + L*Math.cos(theta)), scale * (y1 + L*Math.sin(theta)));
+	gr.addColorStop(0,'rgb(204,204,204)');
+	gr.addColorStop(0.5, 'rgb(191,191,191)');
+	gr.addColorStop(1,'rgb(200,200,200)');
+	ctx.fillStyle = gr;
+
+	ctx.moveTo(scale * x1, scale * y1);
+	ctx.lineTo(scale * (x1 + L * Math.cos(theta)), scale * (y1 + L * Math.sin(theta)));
+	ctx.lineTo(scale * (x1 + L * Math.cos(theta) - t * Math.sin(theta)), scale * (y1 + L * Math.sin(theta) + t * Math.cos(theta)));
+	ctx.lineTo(scale * (x1 - t * Math.sin(theta)), scale * (y1 + t * Math.cos(theta)));
+	ctx.lineTo(scale * x1, scale * y1);
+	ctx.stroke();
+
+	ctx.fill();
+	ctx.closePath();
+}
+
+function drawRectangleSlantYellow(x1, y1, L, t, theta) {
+	var ctx=canvas.getContext("2d");
+	ctx.beginPath();
+	var gr = ctx.createLinearGradient(scale * x1, scale * y1, scale * (x1 + L*Math.cos(theta)), scale * (y1 + L*Math.sin(theta)));
+	gr.addColorStop(0,'rgb(255, 255, 204)');
+	gr.addColorStop(0.5, 'rgb(255, 255, 202)');
+	gr.addColorStop(1,'rgb(255, 255, 204)');
+	ctx.fillStyle = gr;
+
+	ctx.moveTo(scale * x1, scale * y1);
+	ctx.lineTo(scale * (x1 + L * Math.cos(theta)), scale * (y1 + L * Math.sin(theta)));
+	ctx.lineTo(scale * (x1 + L * Math.cos(theta) - t * Math.sin(theta)), scale * (y1 + L * Math.sin(theta) + t * Math.cos(theta)));
+	ctx.lineTo(scale * (x1 - t * Math.sin(theta)), scale * (y1 + t * Math.cos(theta)));
+	ctx.lineTo(scale * x1, scale * y1);
+
+
+	ctx.fill();
+	ctx.closePath();
+}
+
+
+</script>
+</head>
+<body onload="draw()">
+
+	<div style="float: left; padding-right: 20px;">
+	<p>x<sub>1</sub> = <span id="slider_x1">3</span> m </p><input id="x1" type="range" step="0.1" value="3" min="2.5" max="7.5" onInput="x1change(this.value); draw()">
+	<p>x<sub>2</sub> = <span id="slider_x2">6</span> m </p><input id="x2" type="range" step="0.1" value="6" min="2.5" max="7.5" onInput="x2change(this.value); draw()">
+	<p>L = <span id="slider_L">14</span> m </p><input id="L" type="range" step="1" value="14" min="8" max="16" onInput="Lchange(this.value); draw()"><br><br>
+
+</div>
+	<div style="float: left; padding-right: 10px;">
+		<p>F<sub>1</sub> = <span id="slider_F1">90</span> N </p><input id="F1" type="range" step="5" value="90" min="0" max="100" onInput="F1change(this.value); draw()">
+		<p>F<sub>2</sub> = <span id="slider_F2">90</span> N </p><input id="F2" type="range" type="range" step="5" value="90" min="0" max="100" onInput="F2change(this.value); draw()">
+		<p>M = <span id="slider_M">15</span> kg </p><input id="M" type="range" step="1" value="15" min="0" max="15" onInput="Mchange(this.value); draw()">
+	</div>
+	<br><br>
+
+<canvas style="position: relative; top: -60px;" id="canvas" width="502" height="300"></canvas>
+
+</body>
+</html>
