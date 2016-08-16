@@ -305,7 +305,8 @@ function getShowVariables() {
         case "1": // Category 1
             switch (page) {
                 case "10":
-                    return ["M", "L", "x_1", "x_2", "F_1", "F_2"] 
+                    return ["M", "L"];
+                    break;
                 case "20": 
                 case "30": 
                 case "40": 
