@@ -284,7 +284,7 @@ function calculateVariables() {
     values.V_1 = values.A_y - values.w * values.d_1;
     values.V_2 = values.A_y - values.w * values.d_2 - values.F_1;
     values.V_3 = values.w * (values.L - values.d_3) - values.B_y;
-    values.M_1 = values.A_y * values.x_1 - 0.5 * values.w * values.x_1 * values.x_1;
+    values.M_1 = values.A_y * values.d_1 - 0.5 * values.w * values.d_1 * values.d_1;
     values.M_2 = values.A_y * values.d_2 - values.F_1 * (values.d_2 - values.x_1) - 0.5 * values.w * values.d_2 * values.d_2;
     values.M_3 = values.B_y * (values.L - values.d_3) - 0.5 * values.w * (values.L - values.d_3) * (values.L - values.d_3);
     values.x_max = (values.L - values.B_y / values.w);
